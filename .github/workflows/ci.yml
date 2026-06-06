@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: qa-conferences/package-lock.json
 
@@ -41,25 +41,25 @@ jobs:
         if: always()
         with:
           name: junit-unit
-          path: qa-conferences/test-results/junit.xml
+          path: qa-conferences/reports/unit/junit.xml
 
       - name: Upload HTML report (unit tests)
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: html-unit
-          path: qa-conferences/test-results/html/
+          path: qa-conferences/reports/unit/html/
 
       - name: Upload JUnit XML (E2E)
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: junit-e2e
-          path: qa-conferences/playwright-report/results.xml
+          path: qa-conferences/reports/e2e/junit.xml
 
       - name: Upload HTML report (E2E)
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: html-e2e
-          path: qa-conferences/playwright-report/
+          path: qa-conferences/reports/e2e/html/
