@@ -3,6 +3,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --topbar-h: 4rem;
+  --sidebar-w: 16rem;
+  --sidebar-w-collapsed: 4rem;
+  --content-padding: 1.5rem;
+  --font-ui: 'Plus Jakarta Sans', sans-serif;
 }
 
 html,
@@ -14,7 +19,7 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -24,3 +29,4 @@ body {
   padding: 0;
   margin: 0;
 }
+
