@@ -1,6 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
+at [specs/001-qa-conferences-dashboard/plan.md](specs/001-qa-conferences-dashboard/plan.md)
 <!-- SPECKIT END -->
 
 ## Testing Standards
@@ -30,7 +31,7 @@ Use the simplest method available for the test framework in use:
 
 | Framework | Method |
 | --------- | ------ |
-| **Vitest** | Add a `properties` field to the test metadata using the `@vitest/junit-reporter` `extraProperties` option, or embed the AC id in the test name as a prefix: `[SP010-US01-CR01] should …` — the JUnit reporter will include it in the `<testcase name>` attribute, which is queryable. When the reporter supports `<properties>`, prefer that. |
+| **Vitest ≥4.1** | Use `context.annotate`: `await annotate('acceptance-criteria', 'SP010-US01-CR01')` inside the test body. This writes `<property name="acceptance-criteria" value="SP010-US01-CR01"/>` into the JUnit XML output via the `onTestAnnotate` reporter hook — no test-name prefix needed. For Vitest <4.1, fall back to embedding the AC id as a test-name prefix: `[SP010-US01-CR01] should …`. |
 | **Playwright** | Use the native tag API: `{ tag: ['@ac-SP010-US01-CR01'] }`. The Playwright JUnit reporter writes tags as `<property name="acceptance-criteria" value="SP010-US01-CR01"/>` in the output. |
 | **pytest** | Use `pytest-metadata` or a custom `record_property` fixture call: `record_property("acceptance-criteria", "SP010-US01-CR01")`. This writes a `<property>` element into the JUnit XML for that test. |
 | **JUnit (Java)** | Annotate the test method with `@Tag("acceptance-criteria=SP010-US01-CR01")` or use a custom `@ExtendWith` listener that adds a `<property>` to the Surefire/Failsafe XML. |

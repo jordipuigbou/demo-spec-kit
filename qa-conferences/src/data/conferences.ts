@@ -1,0 +1,60 @@
+import type { ConferenceEvent } from '@/types/conference'
+
+export const CONFERENCES: ConferenceEvent[] = [
+  {
+    id: 'madrid-testingconf-2026',
+    name: 'TestingConf Madrid 2026',
+    date: '2026-03-12',
+    city: 'Madrid',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
+    imageAlt: 'Conference hall with audience at TestingConf Madrid',
+  },
+  {
+    id: 'barcelona-qa-summit-2026',
+    name: 'QA Summit Barcelona',
+    date: '2026-04-23',
+    city: 'Barcelona',
+    imageUrl: 'https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800&q=80',
+    imageAlt: 'Modern conference venue in Barcelona for QA Summit',
+  },
+  {
+    id: 'testbcn-spring-2026',
+    name: 'TestBCN Spring',
+    date: '2026-05-15',
+    city: 'Barcelona',
+    imageUrl: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&q=80',
+    imageAlt: 'Tech speakers on stage at TestBCN Spring conference',
+  },
+  {
+    id: 'seville-agile-testing-2026',
+    name: 'Agile Testing Day España',
+    date: '2026-06-11',
+    city: 'Seville',
+    imageUrl: 'https://images.unsplash.com/photo-1576085898323-218337e3e43c?w=800&q=80',
+    imageAlt: 'Agile team workshop session at Agile Testing Day España in Seville',
+  },
+  {
+    id: 'madrid-qa-week-2026',
+    name: 'QA & Testing Week Madrid',
+    date: '2026-09-17',
+    city: 'Madrid',
+    imageUrl: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800&q=80',
+    imageAlt: 'Large auditorium with attendees at QA Testing Week Madrid',
+  },
+  {
+    id: 'valencia-spaintest-2026',
+    name: 'SpainTest Valencia',
+    date: '2026-10-08',
+    city: 'Valencia',
+    imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
+    imageAlt: 'Coastal city venue for SpainTest Valencia conference',
+  },
+  {
+    id: 'bilbao-taqfest-2026',
+    name: 'TAQfest Bilbao',
+    date: '2026-11-20',
+    city: 'Bilbao',
+    imageUrl: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=800&q=80',
+    imageAlt: 'Modern architecture venue hosting TAQfest Bilbao testing festival',
+  },
+]
