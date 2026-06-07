@@ -7,6 +7,11 @@ import type { AppShellProps, NavItem } from '@/types/sidebar'
 
 const NAV_ITEMS: NavItem[] = [
   { id: 'conferences', label: 'Conferencias', href: '/', icon: 'conference' },
+  { id: 'training', label: 'Formación', href: '#', icon: 'training' },
+  { id: 'resources', label: 'Recursos de Testing', href: '#', icon: 'resources' },
+  { id: 'jobs', label: 'Empleo', href: '#', icon: 'jobs' },
+  { id: 'community', label: 'Comunidad', href: '#', icon: 'community' },
+  { id: 'tools', label: 'Herramientas', href: '#', icon: 'tools' },
 ]
 
 const STORAGE_KEY = 'sidebarExpanded'

@@ -6,7 +6,7 @@ import type { TopBarProps } from '@/types/sidebar'
 function LogoMark() {
   return (
     <Link href="/" className="flex items-center font-bold text-lg font-[family-name:var(--font-ui)]" aria-label="QA">
-      <span data-testid="logo-mark">QA</span>
+      <span data-testid="logo-mark">Spec-kit Demo</span>
     </Link>
   )
 }

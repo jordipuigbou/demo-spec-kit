@@ -38,10 +38,10 @@ describe('TopBar', () => {
     expect(btn).toBeTruthy()
   })
 
-  it('[Edge-SP002-US01-A] LogoMark renders "QA" text fallback', async ({ annotate }) => {
+  it('[Edge-SP002-US01-A] LogoMark renders brand text', async ({ annotate }) => {
     await annotate('acceptance-criteria', 'Edge-SP002-US01-A')
     render(<TopBar />)
-    expect(screen.getByText('QA')).toBeTruthy()
+    expect(screen.getByText('Spec-kit Demo')).toBeTruthy()
   })
 
   it('[AC-SP002-US04-CR01] toggle button carries font-ui class', async ({ annotate }) => {
