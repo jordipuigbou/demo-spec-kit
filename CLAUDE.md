@@ -48,3 +48,15 @@ Every test execution — regardless of level (unit, integration, E2E) — MUST p
 2. **HTML report** — human-readable summary of results, coverage, and failures. Must be produced alongside the JUnit XML in the same output directory.
 
 Configure the test runner to emit both formats by default (not only on CI). If the framework requires two separate reporter entries, add both to the project config and commit them — do not rely on ad-hoc CLI flags.
+
+### Live Verification of Developments
+
+Automated tests are necessary but not sufficient. Before considering any user-facing change complete, verify it against the **running application** — observe the real behaviour rather than inferring it from a passing test suite or from the diff.
+
+Use the **`playwright-cli` skill** (`.claude/skills/playwright-cli/`) as the standard tool for this. It drives a real browser to:
+
+- Navigate to the running app and inspect the **live DOM** — read computed styles and bounding boxes with `eval` to measure actual rendered layout (e.g., confirm a margin or spacing is really applied, not silently overridden).
+- Capture screenshots for a visual check of the result.
+- Read the console and network logs to diagnose runtime errors.
+
+This is the designated way to confirm a fix works and to reproduce reported visual/behavioural bugs. When a CSS or layout utility appears to have "no effect", measure the rendered element via the skill before changing more code — the cause is often an override, not the edit. The skill's generated artifacts (`.playwright-cli/`) are git-ignored.

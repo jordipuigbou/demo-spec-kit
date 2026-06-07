@@ -95,6 +95,18 @@ Common patterns (adjust to your actual stack):
 | Integration | Supertest, pytest + testcontainers, Spring Boot Test, Vitest (with real DB), Playwright component mode |
 | E2E | Playwright, Cypress, Selenium, pytest + httpx (API E2E) |
 
+### Live verification of a running application
+
+Beyond automated test files, every story that produces user-facing behaviour MUST be verified against the **running application** before its checkpoint is marked complete — observe the real behaviour, do not infer it from passing unit tests alone.
+
+Use the **`playwright-cli` skill** (`.claude/skills/playwright-cli/`) to drive a real browser headlessly: navigate to the running app, inspect the live DOM (`eval` computed styles / bounding boxes), capture screenshots, and read the console/network. This is the designated tool for:
+
+- Confirming a UI change actually renders as intended (layout, spacing, visibility) — measure the DOM, do not trust the diff.
+- Reproducing and validating the fix for a reported visual/behavioural bug.
+- Driving E2E `🔴` test scenarios interactively while authoring the Playwright test that codifies them.
+
+Record live-verification steps as a final task in each user story (e.g. `[US1] Verify story against running app via playwright-cli skill`).
+
 ### Mocking strategy (Constitution §I)
 
 External systems MUST be mocked **at the component boundary** to enable fully local test execution:
