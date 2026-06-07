@@ -1,10 +1,10 @@
 # demo-spec-kit
 
-A reference project demonstrating the [Spec Kit](https://github.com/jordipuigbou/spec-kit) specification-driven development workflow with an AI coding agent (Claude Code).
+A reference repository demonstrating the [Spec Kit](https://github.com/jordipuigbou/spec-kit) specification-driven development workflow with an AI coding agent (Claude Code).
 
 ## What is Spec Kit?
 
-Spec Kit is a CLI tool that turns natural-language feature descriptions into structured, traceable engineering artifacts — specification, implementation plan, and task list — before a single line of code is written. It enforces a **Test-First, Specification-Driven** quality approach through a built-in project constitution and integrates with AI coding agents via a managed context file (`CLAUDE.md`).
+Spec Kit is a Claude Code skill set that turns a natural-language feature description into structured, traceable engineering artifacts — specification, implementation plan, and task list — before a single line of code is written. It enforces a **Test-First, Specification-Driven** quality approach through a built-in project constitution and keeps the AI coding agent aligned via a managed context file (`CLAUDE.md`).
 
 The typical workflow per feature:
 
@@ -16,43 +16,41 @@ The typical workflow per feature:
 /speckit-implement →  source code    (AI agent executes each task, test-first)
 ```
 
-## Demo feature: QA Conferences Dashboard Spain
+Each command produces a versioned artifact under `specs/<feature-id>/` so the full decision trail — from requirement to merged code — is auditable at any point.
 
-The `qa-conferences/` directory contains a **Next.js 16** single-page application built end-to-end using the Spec Kit workflow. It displays a responsive card grid of mocked QA and testing conference events in Spain.
+## About this demo
 
-All design artifacts live under `specs/001-qa-conferences-dashboard/`:
+This repo contains a small **Next.js** web app built incrementally through the Spec Kit workflow. The app itself is intentionally simple; the point is to show what the process looks like in practice: how features are specified, how plans are generated, how tasks are derived, and how an AI agent implements them.
 
-| Artifact | Description |
-| --- | --- |
-| [spec.md](specs/001-qa-conferences-dashboard/spec.md) | User stories, acceptance criteria, functional requirements |
-| [plan.md](specs/001-qa-conferences-dashboard/plan.md) | Architecture, tech stack, project structure, constitution check |
-| [tasks.md](specs/001-qa-conferences-dashboard/tasks.md) | Ordered implementation tasks with AC coverage matrix |
+Every feature in the app has a corresponding `specs/<id>-<slug>/` directory with the full artifact chain:
 
-## Project structure
+| Feature | Spec artifacts | What was built |
+| --- | --- | --- |
+| `001-qa-conferences-dashboard` | [spec](specs/001-qa-conferences-dashboard/spec.md) · [plan](specs/001-qa-conferences-dashboard/plan.md) · [tasks](specs/001-qa-conferences-dashboard/tasks.md) | Responsive card grid of QA conference events in Spain |
+| `002-layout-sidebar-topbar` | [spec](specs/002-layout-sidebar-topbar/spec.md) · [plan](specs/002-layout-sidebar-topbar/plan.md) · [tasks](specs/002-layout-sidebar-topbar/tasks.md) | Collapsible sidebar, top bar, and typography system |
+
+## Repository structure
 
 ```text
 demo-spec-kit/
-├── specs/
-│   └── 001-qa-conferences-dashboard/   ← design artifacts for the demo feature
+├── specs/                          ← one directory per feature, all design artifacts
+│   ├── 001-qa-conferences-dashboard/
+│   │   ├── spec.md
+│   │   ├── plan.md
+│   │   └── tasks.md
+│   └── 002-layout-sidebar-topbar/
 │       ├── spec.md
 │       ├── plan.md
-│       ├── tasks.md
-│       ├── research.md
-│       ├── data-model.md
-│       └── contracts/
-├── qa-conferences/                     ← Next.js application (demo feature)
+│       └── tasks.md
+├── qa-conferences/                 ← the demo Next.js application
 │   ├── src/
-│   │   ├── app/                        ← App Router entry points
-│   │   ├── components/                 ← EventCard, EventGrid
-│   │   ├── data/conferences.ts         ← static mocked event data (7 events)
-│   │   └── types/
-│   └── tests/e2e/                      ← Playwright E2E tests
-├── .specify/                           ← Spec Kit configuration and extensions
-├── CLAUDE.md                           ← AI coding agent context (managed by Spec Kit)
-└── .github/workflows/ci.yml           ← CI pipeline
+│   └── tests/
+├── .specify/                       ← Spec Kit configuration
+├── CLAUDE.md                       ← AI agent context (managed by Spec Kit)
+└── .github/workflows/ci.yml
 ```
 
-## Running the demo app
+## Running the app
 
 ```bash
 cd qa-conferences
@@ -65,27 +63,23 @@ npm run dev          # http://localhost:3000
 ```bash
 cd qa-conferences
 
-npm run test:ci      # Vitest unit + component tests (coverage + JUnit XML)
+npm run test:ci      # Vitest unit + component tests (JUnit XML + HTML report)
 npm run test:e2e     # Playwright E2E tests
 npm run test:all     # both suites
 ```
 
-Test reports are written to `qa-conferences/reports/`:
+Reports are written to `qa-conferences/reports/`:
 
-- `reports/unit/junit.xml` and `reports/unit/html/` — Vitest
-- `reports/e2e/junit.xml` and `reports/e2e/html/` — Playwright
+- `reports/unit/junit.xml` · `reports/unit/html/` — Vitest
+- `reports/e2e/junit.xml` · `reports/e2e/html/` — Playwright
 
-## Tech stack (demo feature)
+## Tech stack
 
 | Layer | Choice |
 | --- | --- |
-| Framework | Next.js 16.x (App Router, Turbopack) |
-| Language | TypeScript 5.x, React 19.2 |
-| Styling | Tailwind CSS 4.x |
-| Unit/component tests | Vitest ≥4.1 + Testing Library |
-| E2E tests | Playwright ≥1.60 |
+| Framework | Next.js (App Router) |
+| Language | TypeScript + React |
+| Styling | Tailwind CSS |
+| Unit/component tests | Vitest + Testing Library |
+| E2E tests | Playwright |
 | CI | GitHub Actions |
-
-## CI
-
-The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and pull request to `main`. It installs dependencies, runs both test suites, and uploads JUnit XML and HTML reports as artifacts for traceability.
