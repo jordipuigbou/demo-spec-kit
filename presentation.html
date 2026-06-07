@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spec Kit — SDD con Agentes de IA</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3250;
+    --accent: #6c63ff;
+    --accent2: #00d4aa;
+    --accent3: #ff6b6b;
+    --accent4: #ffd166;
+    --text: #e8eaf6;
+    --text-muted: #7b82a8;
+    --text-dim: #4a5080;
+    --radius: 12px;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ─── SLIDESHOW CONTAINER ─── */
+  #deck {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(60px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
+  .slide.prev {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  /* ─── CONTROLS ─── */
+  #nav {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+    background: rgba(26,29,39,0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 10px 20px;
+  }
+  #nav button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 18px;
+    transition: color 0.2s;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  #nav button:hover { color: var(--accent); }
+  #progress {
+    font-size: 12px;
+    color: var(--text-muted);
+    min-width: 60px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  #dots {
+    display: flex;
+    gap: 6px;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active {
+    background: var(--accent);
+    transform: scale(1.4);
+  }
+
+  /* ─── TYPOGRAPHY ─── */
+  .slide-tag {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .slide-tag::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  h1 {
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+  h2 {
+    font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  p {
+    font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+    color: var(--text-muted);
+    line-height: 1.65;
+    max-width: 680px;
+  }
+  .highlight { color: var(--accent); }
+  .highlight2 { color: var(--accent2); }
+  .highlight3 { color: var(--accent3); }
+  .highlight4 { color: var(--accent4); }
+
+  /* ─── LAYOUT HELPERS ─── */
+  .cols { display: flex; gap: 40px; width: 100%; max-width: 1200px; align-items: flex-start; }
+  .col { flex: 1; }
+  .stack { display: flex; flex-direction: column; gap: 20px; }
+  .center { text-align: center; align-items: center; }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+  }
+  .card-accent {
+    border-left: 3px solid var(--accent);
+  }
+  .card-accent2 { border-left: 3px solid var(--accent2); }
+  .card-accent3 { border-left: 3px solid var(--accent3); }
+  .card-accent4 { border-left: 3px solid var(--accent4); }
+
+  /* ─── PILL / BADGE ─── */
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .pill-accent { background: rgba(108,99,255,0.15); color: var(--accent); }
+  .pill-accent2 { background: rgba(0,212,170,0.12); color: var(--accent2); }
+  .pill-accent3 { background: rgba(255,107,107,0.12); color: var(--accent3); }
+  .pill-accent4 { background: rgba(255,209,102,0.12); color: var(--accent4); }
+
+  /* ─── CODE BLOCK ─── */
+  .code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    line-height: 1.7;
+    color: #c8d3f5;
+    white-space: pre;
+  }
+  .code .kw { color: #c099ff; }
+  .code .str { color: #c3e88d; }
+  .code .cmd { color: #86e1fc; }
+  .code .cmt { color: var(--text-dim); }
+  .code .acc { color: var(--accent2); }
+
+  /* ─── SLIDE 1: COVER ─── */
+  #s1 {
+    background: radial-gradient(ellipse at 60% 40%, rgba(108,99,255,0.12) 0%, transparent 65%),
+                radial-gradient(ellipse at 20% 80%, rgba(0,212,170,0.07) 0%, transparent 55%);
+    text-align: center;
+    align-items: center;
+  }
+  #s1 h1 { margin-bottom: 20px; }
+  #s1 p { margin: 0 auto 32px; }
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    padding: 10px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .logo-icon {
+    font-size: 22px;
+  }
+  .logo-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  /* ─── PRINCIPLE GRID ─── */
+  .principle-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    width: 100%;
+    max-width: 1100px;
+  }
+  .principle-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    transition: border-color 0.2s;
+  }
+  .principle-item:hover { border-color: var(--accent); }
+  .principle-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .principle-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .principle-desc {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ─── FLOW DIAGRAM ─── */
+  .flow-wrapper {
+    width: 100%;
+    max-width: 980px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+  .flow-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 160px;
+  }
+  .flow-box {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    min-width: 150px;
+    transition: border-color 0.2s;
+    cursor: default;
+  }
+  .flow-box:hover { border-color: var(--accent); }
+  .flow-box.phase { border-color: var(--accent); background: rgba(108,99,255,0.08); }
+  .flow-icon { font-size: 20px; margin-bottom: 4px; }
+  .flow-label { font-size: 13px; font-weight: 700; color: var(--text); }
+  .flow-sublabel { font-size: 10.5px; color: var(--text-muted); margin-top: 3px; }
+  .flow-arrow {
+    font-size: 18px;
+    color: var(--text-dim);
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+  .flow-output {
+    font-size: 10px;
+    color: var(--accent2);
+    font-family: var(--font-mono);
+    margin-top: 5px;
+    padding: 2px 8px;
+    background: rgba(0,212,170,0.08);
+    border-radius: 4px;
+    border: 1px solid rgba(0,212,170,0.2);
+  }
+  .flow-start, .flow-end {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .flow-connector-v {
+    width: 2px;
+    height: 24px;
+    background: linear-gradient(to bottom, var(--border), transparent);
+    margin: 0 auto;
+  }
+
+  /* ─── QA PHASE TABLE ─── */
+  .qa-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .qa-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  .qa-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(46,50,80,0.5);
+    color: var(--text);
+    vertical-align: top;
+  }
+  .qa-table tr:last-child td { border-bottom: none; }
+  .qa-table tr:hover td { background: rgba(108,99,255,0.04); }
+
+  /* ─── SKILL CHIP ─── */
+  .skill-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: rgba(0,212,170,0.08);
+    border: 1px solid rgba(0,212,170,0.2);
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-family: var(--font-mono);
+    color: var(--accent2);
+    margin: 2px;
+    white-space: nowrap;
+  }
+  .skill-chip-qa {
+    background: rgba(255,209,102,0.08);
+    border-color: rgba(255,209,102,0.2);
+    color: var(--accent4);
+  }
+
+  /* ─── DEMO SLIDE ─── */
+  .terminal {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 680px;
+  }
+  .terminal-header {
+    background: var(--surface2);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .term-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .term-dot.r { background: #ff5f57; }
+  .term-dot.y { background: #febc2e; }
+  .term-dot.g { background: #28c840; }
+  .terminal-body {
+    padding: 16px 20px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: #c8d3f5;
+  }
+  .term-prompt { color: var(--accent2); }
+  .term-cmd { color: var(--accent); }
+  .term-out { color: var(--text-muted); }
+  .term-success { color: var(--accent2); }
+  .term-file { color: var(--accent4); }
+
+  /* ─── COVER GRADIENT TEXT ─── */
+  .grad-text {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ─── SLIDE 2 PROBLEM ─── */
+  .problem-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .problem-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 1rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .problem-list li .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ─── BIG NUMBER ─── */
+  .big-stat {
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  /* ─── KEYS HINT ─── */
+  #hint {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .key {
+    display: inline-block;
+    padding: 2px 7px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+  }
+
+  /* AC trace badge */
+  .ac-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 6px;
+    background: rgba(255,209,102,0.12);
+    color: var(--accent4);
+    border: 1px solid rgba(255,209,102,0.25);
+    display: inline-block;
+  }
+
+  /* slide number watermark */
+  .slide-num {
+    position: absolute;
+    top: 28px;
+    left: 40px;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+  }
+
+  /* section divider line */
+  .divider {
+    width: 48px;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    margin: 20px 0;
+  }
+
+  .width-full { width: 100%; max-width: 1100px; }
+
+</style>
+</head>
+<body>
+
+<div id="hint">
+  <span class="key">←</span><span class="key">→</span> navegar &nbsp;|&nbsp; <span class="key">F</span> pantalla completa
+</div>
+
+<div id="deck">
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 1 — PORTADA
+  ════════════════════════════════════════ -->
+  <div class="slide active" id="s1">
+    <div class="logo-area">
+      <span class="logo-icon">⚙️</span>
+      <span class="logo-label">Spec Kit &nbsp;·&nbsp; QA Demo</span>
+    </div>
+    <h1><span class="grad-text">Specification-Driven<br>Development</span><br>con Agentes de IA</h1>
+    <div class="divider" style="margin:28px auto;"></div>
+    <p>Cómo convertir una descripción en lenguaje natural en código trazable, testado y alineado con negocio — sin saltar ningún paso.</p>
+    <div style="display:flex;gap:12px;margin-top:40px;flex-wrap:wrap;justify-content:center;">
+      <span class="pill pill-accent">SDD</span>
+      <span class="pill pill-accent2">Spec Kit CLI</span>
+      <span class="pill pill-accent4">QA Integration</span>
+      <span class="pill pill-accent3">Claude Code</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 2 — QUÉ ES SDD
+  ════════════════════════════════════════ -->
+  <div class="slide" id="s2">
+    <span class="slide-num">01</span>
+    <div class="width-full">
+      <div class="slide-tag">Introducción</div>
+      <h2>Specification-Driven<br><span class="highlight">Development</span></h2>
+      <div class="divider"></div>
+      <div class="cols" style="margin-top:8px;">
+        <div class="col">
+          <p style="margin-bottom:20px;">SDD es un enfoque donde <strong>los artefactos de diseño</strong> — especificación, plan y tareas — se crean <em>antes</em> de escribir la primera línea de código.</p>
+          <ul class="problem-list">
+            <li><span class="icon">🔴</span><span>El <strong>código sin spec</strong> produce sistemas que cumplen la implementación, no el requisito</span></li>
+            <li><span class="icon">🔴</span><span><strong>Tests escritos después</strong> validan lo que se hizo, no lo que se necesitaba</span></li>
+            <li><span class="icon">🔴</span><span><strong>Agentes de IA sin contexto</strong> generan código plausible pero incorrecto</span></li>
+            <li><span class="icon">🔴</span><span><strong>Requisitos ambiguos</strong> = retrabajo = coste exponencial</span></li>
+          </ul>
+        </div>
+        <div class="col">
+          <div class="card card-accent2" style="margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:600;color:var(--accent2);margin-bottom:8px;">✅ CON SDD</div>
+            <ul class="problem-list">
+              <li><span class="icon">✅</span><span>Los <strong>criterios de aceptación</strong> definen el contrato antes de implementar</span></li>
+              <li><span class="icon">✅</span><span>Los <strong>tests son trazables</strong> a requisitos concretos</span></li>
+              <li><span class="icon">✅</span><span>El agente de IA opera con <strong>contexto estructurado</strong>, no intuición</span></li>
+              <li><span class="icon">✅</span><span>QA puede intervenir <strong>desde el día 0</strong>, no en revisión</span></li>
+            </ul>
+          </div>
+          <div class="card" style="text-align:center;padding:16px;">
+            <div class="big-stat grad-text">Spec → Test → Code</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">El orden importa</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 3 — QUÉ ES SPEC KIT
+  ════════════════════════════════════════ -->
+  <div class="slide" id="s3">
+    <span class="slide-num">02</span>
+    <div class="width-full">
+      <div class="slide-tag">Herramienta</div>
+      <h2>¿Qué es <span class="highlight">Spec Kit</span>?</h2>
+      <div class="divider"></div>
+      <div class="cols">
+        <div class="col stack">
+          <p>Spec Kit es un <strong>CLI + sistema de skills</strong> para Claude Code que transforma descripciones en lenguaje natural en artefactos de ingeniería estructurados y trazables.</p>
+          <div class="card card-accent">
+            <div class="principle-num">ESTRUCTURA DE PROYECTO</div>
+            <div class="code" style="font-size:11px;padding:12px 14px;">
+<span class="cmt">demo-spec-kit/</span>
+├── <span class="acc">.specify/</span>          <span class="cmt"># config, templates, memoria</span>
+│   ├── memory/constitution.md
+│   ├── templates/          <span class="cmt"># spec, plan, tasks</span>
+│   └── extensions.yml      <span class="cmt"># hooks QA</span>
+├── specs/
+│   └── 001-feature/        <span class="cmt"># artefactos por feature</span>
+│       ├── spec.md
+│       ├── plan.md
+│       └── tasks.md
+└── <span class="acc">CLAUDE.md</span>           <span class="cmt"># contexto del agente</span>
+            </div>
+          </div>
+        </div>
+        <div class="col stack">
+          <div class="card" style="padding:20px 24px;">
+            <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:12px;">SKILLS DISPONIBLES</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <span class="skill-chip">/speckit-specify</span>
+              <span class="skill-chip">/speckit-clarify</span>
+              <span class="skill-chip">/speckit-plan</span>
+              <span class="skill-chip">/speckit-tasks</span>
+              <span class="skill-chip">/speckit-implement</span>
+              <span class="skill-chip">/speckit-analyze</span>
+              <span class="skill-chip">/speckit-constitution</span>
+              <span class="skill-chip">/speckit-checklist</span>
+            </div>
+          </div>
+          <div class="card card-accent2">
+            <div class="principle-num">INTEGRACIÓN</div>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text-muted);">
+              <li>🤖 <strong style="color:var(--text);">Claude Code</strong> — agente de IA como motor</li>
+              <li>📋 <strong style="color:var(--text);">CLAUDE.md</strong> — contexto gestionado automáticamente</li>
+              <li>🔗 <strong style="color:var(--text);">GitHub Actions</strong> — gates de calidad en CI/CD</li>
+              <li>🧪 <strong style="color:var(--text);">JUnit XML + HTML</strong> — trazabilidad de ACs</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 4 — CONSTITUCIÓN
+  ════════════════════════════════════════ -->
+  <div class="slide" id="s4">
+    <span class="slide-num">03</span>
+    <div class="width-full">
+      <div class="slide-tag">Gobernanza</div>
+      <h2>La <span class="highlight">Constitución</span></h2>
+      <div class="divider"></div>
+      <p style="margin-bottom:24px;">Documento de gobernanza en <code style="font-family:var(--font-mono);font-size:13px;color:var(--accent2);">.specify/memory/constitution.md</code> que define los principios no negociables del proyecto. Todo artefacto generado se valida contra ella.</p>
+      <div class="principle-grid">
+        <div class="principle-item">
+          <div class="principle-num">PRINCIPIO I</div>
+          <div class="principle-title">Test-First Development</div>
+          <div class="principle-desc"><strong>NON-NEGOTIABLE.</strong> Tests escritos y fallando <em>antes</em> de cualquier implementación. Ciclo Red → Green → Refactor.</div>
+        </div>
+        <div class="principle-item">
+          <div class="principle-num">PRINCIPIO II</div>
+          <div class="principle-title">Testing Pyramid</div>
+          <div class="principle-desc">Unit ≥70% · Integration 20-25% · E2E ≤10%. Umbrales de cobertura: 80% línea, 90% módulos críticos.</div>
+        </div>
+        <div class="principle-item">
+          <div class="principle-num">PRINCIPIO III</div>
+          <div class="principle-title">Code Quality</div>
+          <div class="principle-desc">Zero errores en análisis estático. Complejidad ciclomática ≤10. Linting y formato sin overrides manuales.</div>
+        </div>
+        <div class="principle-item">
+          <div class="principle-num">PRINCIPIO IV</div>
+          <div class="principle-title">Specification-Driven</div>
+          <div class="principle-desc">Cada test trazable a un AC. Ningún test sin requisito. Requisitos no testables son inválidos.</div>
+        </div>
+        <div class="principle-item">
+          <div class="principle-num">PRINCIPIO V</div>
+          <div class="principle-title">Continuous Quality Gates</div>
+          <div class="principle-desc">CI/CD bloquea merge si falla cualquier gate. Override requiere documentación por Quality Owner.</div>
+        </div>
+        <div class="principle-item">
+          <div class="principle-num">PRINCIPIO VI</div>
+          <div class="principle-title">Defect Prevention</div>
+          <div class="principle-desc">Type checking obligatorio. Security scanning en cada commit. Dependency vulnerability scanning en CI.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 5 — FASES + FLOWCHART
+  ════════════════════════════════════════ -->
+  <div class="slide" id="s5">
+    <span class="slide-num">04</span>
+    <div class="width-full">
+      <div class="slide-tag">Workflow</div>
+      <h2>Las cuatro fases de <span class="highlight">Spec Kit</span></h2>
+      <div class="divider"></div>
+      <div class="flow-wrapper" style="margin-top:16px;">
+        <!-- Row 1: START + phases -->
+        <div class="flow-row">
+          <div class="flow-node">
+            <div class="flow-start">💬 Feature description</div>
+          </div>
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            <div class="flow-box phase">
+              <div class="flow-icon">📝</div>
+              <div class="flow-label">/speckit-specify</div>
+              <div class="flow-sublabel">Spec en lenguaje natural</div>
+            </div>
+            <div class="flow-output">spec.md</div>
+          </div>
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            <div class="flow-box phase">
+              <div class="flow-icon">🔍</div>
+              <div class="flow-label">/speckit-clarify</div>
+              <div class="flow-sublabel">Preguntas de refinamiento</div>
+            </div>
+            <div class="flow-output">spec.md (refined)</div>
+          </div>
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            <div class="flow-box phase">
+              <div class="flow-icon">🏗️</div>
+              <div class="flow-label">/speckit-plan</div>
+              <div class="flow-sublabel">Arquitectura y decisiones</div>
+            </div>
+            <div class="flow-output">plan.md</div>
+          </div>
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            <div class="flow-box phase">
+              <div class="flow-icon">📋</div>
+              <div class="flow-label">/speckit-tasks</div>
+              <div class="flow-sublabel">Lista ordenada de tareas</div>
+            </div>
+            <div class="flow-output">tasks.md</div>
+          </div>
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            <div class="flow-box phase">
+              <div class="flow-icon">⚡</div>
+              <div class="flow-label">/speckit-implement</div>
+              <div class="flow-sublabel">Ejecución task-first</div>
+            </div>
+            <div class="flow-output">source code</div>
+          </div>
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            <div class="flow-start">✅ Feature<br>completa</div>
+          </div>
+        </div>
+
+        <!-- Descriptions row -->
+        <div style="display:flex;gap:0;justify-content:center;margin-top:20px;padding:0 16px;">
+          <div style="flex:1;margin:0 8px;text-align:center;">
+            <div style="font-size:11px;color:var(--text-muted);line-height:1.5;">User stories<br>+ ACs<br>+ requisitos</div>
+          </div>
+          <div style="flex:1;margin:0 8px;text-align:center;">
+            <div style="font-size:11px;color:var(--text-muted);line-height:1.5;">Gaps y<br>ambigüedades<br>detectadas</div>
+          </div>
+          <div style="flex:1;margin:0 8px;text-align:center;">
+            <div style="font-size:11px;color:var(--text-muted);line-height:1.5;">Stack técnico<br>estructura<br>constitution check</div>
+          </div>
+          <div style="flex:1;margin:0 8px;text-align:center;">
+            <div style="font-size:11px;color:var(--text-muted);line-height:1.5;">Tareas ordenadas<br>por US y<br>dependencias</div>
+          </div>
+          <div style="flex:1;margin:0 8px;text-align:center;">
+            <div style="font-size:11px;color:var(--text-muted);line-height:1.5;">TDD, tests<br>primero,<br>CI gates</div>
+          </div>
+        </div>
+
+        <!-- Constitution check note -->
+        <div style="margin-top:20px;text-align:center;">
+          <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.2);border-radius:8px;font-size:12px;color:var(--text-muted);">
+            <span style="color:var(--accent);">⚖️</span>
+            <span>La <strong style="color:var(--text);">Constitución</strong> se verifica automáticamente en <code style="font-family:var(--font-mono);color:var(--accent2);">/speckit-plan</code> y <code style="font-family:var(--font-mono);color:var(--accent2);">/speckit-tasks</code> antes de avanzar</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 6 — QA TOUCHPOINTS
+  ════════════════════════════════════════ -->
+  <div class="slide" id="s6">
+    <span class="slide-num">05</span>
+    <div class="width-full">
+      <div class="slide-tag">QA Integration</div>
+      <h2>Dónde interviene <span class="highlight4">QA</span></h2>
+      <div class="divider"></div>
+      <table class="qa-table">
+        <thead>
+          <tr>
+            <th>Fase</th>
+            <th>Artefacto</th>
+            <th>Intervención QA</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-accent">/speckit-specify</span></td>
+            <td><code style="font-family:var(--font-mono);font-size:12px;">spec.md</code></td>
+            <td>Revisar ACs, detectar ambigüedades, validar que los escenarios son testables (Given-When-Then)</td>
+            <td style="color:var(--accent2);">Shift-left máximo</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-accent">/speckit-clarify</span></td>
+            <td><code style="font-family:var(--font-mono);font-size:12px;">spec.md</code></td>
+            <td>Añadir preguntas de cobertura, edge cases, flujos negativos y criterios de rendimiento</td>
+            <td style="color:var(--accent2);">Requisitos completos</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-accent">/speckit-plan</span></td>
+            <td><code style="font-family:var(--font-mono);font-size:12px;">plan.md</code></td>
+            <td>Verificar Constitution Check: pirámide de tests, umbrales de cobertura, herramientas de análisis estático</td>
+            <td style="color:var(--accent2);">Estrategia de test</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-accent">/speckit-tasks</span></td>
+            <td><code style="font-family:var(--font-mono);font-size:12px;">tasks.md</code></td>
+            <td>Confirmar que cada US tiene tareas de test, que los IDs de AC están anotados, y que los tests fallan antes de implementar</td>
+            <td style="color:var(--accent2);">Trazabilidad total</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-accent">/speckit-implement</span></td>
+            <td>código</td>
+            <td>Revisar outputs de CI (JUnit XML, HTML reports), validar cobertura por US, aprobar PRs contra ACs</td>
+            <td style="color:var(--accent2);">Gate de merge</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 7 — CUSTOMIZACIONES: tasks-template
+  ════════════════════════════════════════ -->
+  <div class="slide" id="s7">
+    <span class="slide-num">06</span>
+    <div class="width-full">
+      <div class="slide-tag">Customización</div>
+      <h2>Override: <span class="highlight4"><code style="font-size:0.85em;">tasks-template.md</code></span></h2>
+      <div class="divider"></div>
+      <div class="cols">
+        <div class="col stack">
+          <p>Spec Kit permite sobrescribir cualquier template en <code style="font-family:var(--font-mono);color:var(--accent2);">.specify/templates/</code>. El template de tareas ya incluye soporte para trazabilidad de ACs.</p>
+          <div class="card card-accent4">
+            <div class="principle-num">IDENTIFICADOR AC</div>
+            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px;">Formato: <span class="ac-badge">SPXXX-USYY-CRZZ</span></div>
+            <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">
+              <strong style="color:var(--text);">SP010</strong> = Sprint/Feature 010<br>
+              <strong style="color:var(--text);">US01</strong> = User Story 01<br>
+              <strong style="color:var(--text);">CR01</strong> = Criterion 01
+            </div>
+          </div>
+          <div class="card">
+            <div class="principle-num">REPORTE: JUnit XML + HTML</div>
+            <div style="font-size:12px;color:var(--text-muted);line-height:1.7;margin-top:4px;">
+              Cada ejecución de tests produce:<br>
+              📄 <code style="font-family:var(--font-mono);color:var(--accent2);">reports/unit/junit.xml</code><br>
+              🌐 <code style="font-family:var(--font-mono);color:var(--accent2);">reports/unit/html/</code><br>
+              📄 <code style="font-family:var(--font-mono);color:var(--accent2);">reports/e2e/junit.xml</code><br>
+              🌐 <code style="font-family:var(--font-mono);color:var(--accent2);">reports/e2e/html/</code>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="code" style="font-size:11.5px;">
+<span class="cmt"># En tasks.md (generado con override QA)</span>
+
+- [ ] T010 [P] [US1] <span class="str">Vitest: card rendering</span>
+      <span class="cmt">AC: SP001-US01-CR01, CR02</span>
+
+<span class="cmt"># En el test (Vitest ≥ 4.1)</span>
+<span class="kw">it</span>(<span class="str">'muestra nombre y fecha del evento'</span>, <span class="kw">async</span> ({ annotate }) =&gt; {
+  <span class="kw">await</span> <span class="acc">annotate</span>(<span class="str">'acceptance-criteria'</span>, <span class="str">'SP001-US01-CR01'</span>)
+  <span class="kw">const</span> { getByText } = render(&lt;EventCard {...event} /&gt;)
+  expect(getByText(<span class="str">'QAward Spain'</span>)).toBeInTheDocument()
+})
+
+<span class="cmt"># En el JUnit XML de salida:</span>
+&lt;testcase name=<span class="str">"muestra nombre y fecha del evento"</span>&gt;
+  &lt;properties&gt;
+    &lt;property
+      name=<span class="str">"acceptance-criteria"</span>
+      value=<span class="str">"SP001-US01-CR01"</span>/&gt;
+  &lt;/properties&gt;
+&lt;/testcase&gt;
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 8 — QA SKILLS
+  ════════════════════════════════════════ -->
+  <div class="slide" id="s8">
+    <span class="slide-num">07</span>
+    <div class="width-full">
+      <div class="slide-tag">QA Skills</div>
+      <h2>Skills de QA en cada <span class="highlight">fase</span></h2>
+      <div class="divider"></div>
+      <table class="qa-table">
+        <thead>
+          <tr>
+            <th>Fase Spec Kit</th>
+            <th>Skills QA disponibles</th>
+            <th>Qué hacen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-accent">/speckit-specify</span></td>
+            <td>
+              <span class="skill-chip skill-chip-qa">/qa-acs-generator</span>
+              <span class="skill-chip skill-chip-qa">/spec-quality-gate</span>
+            </td>
+            <td style="font-size:12px;color:var(--text-muted);">Genera criterios de aceptación desde historias de usuario y valida la calidad de la spec antes de planificar</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-accent">/speckit-clarify</span></td>
+            <td>
+              <span class="skill-chip skill-chip-qa">/qa-acs-generator</span>
+              <span class="skill-chip skill-chip-qa">/quality-principles-guidance</span>
+            </td>
+            <td style="font-size:12px;color:var(--text-muted);">Enriquece ACs con edge cases, flujos negativos y criterios de rendimiento alineados con los principios de calidad</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-accent">/speckit-plan</span></td>
+            <td>
+              <span class="skill-chip skill-chip-qa">/quality-principles-guidance</span>
+            </td>
+            <td style="font-size:12px;color:var(--text-muted);">Guía la estrategia de test (pirámide, herramientas) alineada con los principios de calidad del departamento</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-accent">/speckit-tasks</span></td>
+            <td>
+              <span class="skill-chip skill-chip-qa">/qa-acs-generator</span>
+              <span class="skill-chip skill-chip-qa">/spec-quality-gate</span>
+            </td>
+            <td style="font-size:12px;color:var(--text-muted);">Verifica que cada tarea tiene AC anotado en formato SPXXX-USYY-CRZZ y que la cobertura AC→test es 100%</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-accent">/speckit-implement</span></td>
+            <td>
+              <span class="skill-chip skill-chip-qa">/bug-reporting</span>
+            </td>
+            <td style="font-size:12px;color:var(--text-muted);">Estructura los defectos encontrados en CI con contexto de AC para facilitar su trazabilidad y seguimiento</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:20px;display:flex;gap:12px;align-items:center;font-size:12px;color:var(--text-muted);">
+        <span>Skills registradas en</span>
+        <code style="font-family:var(--font-mono);color:var(--accent2);font-size:11px;">.claude/skills/</code>
+        <span>y disponibles como</span>
+        <code style="font-family:var(--font-mono);color:var(--accent4);font-size:11px;">/skill-name</code>
+        <span>en Claude Code</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 9 — DEMO
+  ════════════════════════════════════════ -->
+  <div class="slide" id="s9">
+    <span class="slide-num">08</span>
+    <div class="width-full">
+      <div class="slide-tag">Demo interactiva</div>
+      <h2><span class="highlight2">demo-spec-kit</span> en vivo</h2>
+      <div class="divider"></div>
+      <div class="cols">
+        <div class="col stack">
+          <p>Este repositorio es la referencia completa: feature especificada, planificada, implementada y testeada con Spec Kit + Claude Code.</p>
+
+          <div class="card card-accent2">
+            <div class="principle-num">FEATURE DEMO: QA Conferences Dashboard</div>
+            <div style="font-size:12px;color:var(--text-muted);line-height:1.8;margin-top:8px;">
+              📄 <strong style="color:var(--text);">spec.md</strong> — 5 ACs, escenarios Given-When-Then<br>
+              🏗️ <strong style="color:var(--text);">plan.md</strong> — Next.js 16, Vitest, Playwright, Constitution Check<br>
+              📋 <strong style="color:var(--text);">tasks.md</strong> — tareas ordenadas por US con IDs de AC<br>
+              ✅ <strong style="color:var(--text);">tests</strong> — Vitest (unit) + Playwright (E2E) + JUnit XML
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="principle-num">PASOS A SEGUIR</div>
+            <ol style="font-size:12.5px;color:var(--text-muted);line-height:1.9;padding-left:16px;margin-top:6px;">
+              <li>Leer <code style="font-family:var(--font-mono);color:var(--accent2);">specs/001-qa-conferences-dashboard/spec.md</code></li>
+              <li>Ejecutar <code style="font-family:var(--font-mono);color:var(--accent);">/speckit-analyze</code> para auditoría</li>
+              <li>Ver <code style="font-family:var(--font-mono);color:var(--accent2);">qa-conferences/</code> — app Next.js generada</li>
+              <li>Correr <code style="font-family:var(--font-mono);color:var(--accent4);">npm run test:all</code> y ver reportes HTML</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="terminal">
+            <div class="terminal-header">
+              <div class="term-dot r"></div>
+              <div class="term-dot y"></div>
+              <div class="term-dot g"></div>
+              <span style="font-size:11px;color:var(--text-dim);margin-left:8px;">Claude Code — demo-spec-kit</span>
+            </div>
+            <div class="terminal-body">
+<span class="term-prompt">$</span> <span class="term-cmd">/speckit-specify</span> QA Conferences Dashboard Spain
+
+<span class="term-out">✓ spec.md creado en specs/001-qa-conferences-dashboard/
+✓ 1 user story · 5 acceptance scenarios
+✓ 8 functional requirements
+✓ Constitution check: passed</span>
+
+<span class="term-prompt">$</span> <span class="term-cmd">/speckit-plan</span>
+
+<span class="term-out">✓ Investigación completada
+✓ Stack: Next.js 16 · TypeScript · Tailwind
+✓ plan.md generado · data-model.md generado</span>
+
+<span class="term-prompt">$</span> <span class="term-cmd">/speckit-tasks</span>
+
+<span class="term-out">✓ 18 tareas generadas · 1 user story
+✓ AC coverage matrix: 5/5 (100%)</span>
+
+<span class="term-prompt">$</span> <span class="term-cmd">/speckit-implement</span>
+
+<span class="term-out">✓ T001 Setup Next.js project
+✓ T002 ConferenceEvent type
+✓ T003 Static data (7 events)
+✓ T004 EventCard component
+✓ T005 EventGrid component
+✓ Tests: 12 unit · 5 E2E
+</span>
+<span class="term-prompt">$</span> <span class="term-cmd">npm run test:all</span>
+
+<span class="term-success">✓ 12 passed (unit) · 5 passed (E2E)
+✓ reports/unit/junit.xml
+✓ reports/e2e/html/index.html</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 10 — CIERRE
+  ════════════════════════════════════════ -->
+  <div class="slide" id="s10">
+    <span class="slide-num">09</span>
+    <div class="center stack" style="max-width:680px;">
+      <div class="slide-tag" style="justify-content:center;">Resumen</div>
+      <h2 class="center"><span class="grad-text">Spec Kit + QA</span><br>= calidad desde el día 0</h2>
+      <div class="divider" style="margin:24px auto;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:700px;margin-top:8px;">
+        <div class="card" style="text-align:left;">
+          <div style="font-size:18px;margin-bottom:8px;">📐</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;">Especificación primero</div>
+          <div style="font-size:12px;color:var(--text-muted);">ACs claros antes de planificar. QA valida la spec, no el código.</div>
+        </div>
+        <div class="card" style="text-align:left;">
+          <div style="font-size:18px;margin-bottom:8px;">⚖️</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;">Constitución como ley</div>
+          <div style="font-size:12px;color:var(--text-muted);">6 principios que el agente verifica automáticamente en cada fase.</div>
+        </div>
+        <div class="card" style="text-align:left;">
+          <div style="font-size:18px;margin-bottom:8px;">🔗</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;">Trazabilidad total</div>
+          <div style="font-size:12px;color:var(--text-muted);">Cada test lleva su AC anotado. JUnit XML + HTML en cada ejecución.</div>
+        </div>
+        <div class="card" style="text-align:left;">
+          <div style="font-size:18px;margin-bottom:8px;">🧩</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;">Skills QA enchufables</div>
+          <div style="font-size:12px;color:var(--text-muted);">bug-reporting, qa-acs-generator, spec-quality-gate integradas en el flujo.</div>
+        </div>
+      </div>
+      <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+        <span class="pill pill-accent2">demo-spec-kit</span>
+        <span class="pill pill-accent">Claude Code</span>
+        <span class="pill pill-accent4">QA Department</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #deck -->
+
+<!-- ─── NAVIGATION ─── -->
+<div id="nav">
+  <button id="prev" title="Anterior">&#8592;</button>
+  <div id="dots"></div>
+  <span id="progress">1 / 10</span>
+  <button id="next" title="Siguiente">&#8594;</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  const dotsEl = document.getElementById('dots');
+  const progressEl = document.getElementById('progress');
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= slides.length) return;
+    slides[current].classList.remove('active');
+    slides[current].classList.add('prev');
+    setTimeout(() => slides[current].classList.remove('prev'), 450);
+    current = idx;
+    slides[current].classList.add('active');
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+    progressEl.textContent = `${current + 1} / ${slides.length}`;
+  }
+
+  document.getElementById('next').addEventListener('click', () => goTo(current + 1));
+  document.getElementById('prev').addEventListener('click', () => goTo(current - 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') goTo(current + 1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
+    if (e.key === 'f' || e.key === 'F') document.documentElement.requestFullscreen?.();
+  });
+
+  // Touch swipe
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) goTo(dx < 0 ? current + 1 : current - 1);
+  });
+</script>
+</body>
+</html>
