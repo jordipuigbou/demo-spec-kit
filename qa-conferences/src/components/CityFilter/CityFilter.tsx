@@ -9,9 +9,9 @@ interface CityFilterProps {
 export function CityFilter({ cities, selectedCity, onChange }: CityFilterProps) {
   return (
     <div data-testid="city-filter">
-      <label htmlFor="city-select">Filter by city</label>
       <select
         id="city-select"
+        aria-label="City filter"
         data-testid="city-select"
         value={selectedCity ?? ''}
         onChange={(e) => onChange(e.target.value === '' ? null : e.target.value)}
@@ -30,7 +30,7 @@ export function CityFilter({ cities, selectedCity, onChange }: CityFilterProps) 
       )}
       {selectedCity && (
         <p data-testid="active-filter-indicator" className="truncate">
-          Showing conferences in: {selectedCity}
+          {selectedCity}
         </p>
       )}
     </div>
